@@ -8,6 +8,7 @@ class GiftHomeScreen extends StatelessWidget {
     required this.onEdit,
     required this.onPlay,
     required this.onShare,
+    required this.onDelete,
     super.key,
   });
 
@@ -16,6 +17,7 @@ class GiftHomeScreen extends StatelessWidget {
   final ValueChanged<GiftProject> onEdit;
   final ValueChanged<GiftProject> onPlay;
   final ValueChanged<GiftProject> onShare;
+  final ValueChanged<GiftProject> onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -51,12 +53,44 @@ class GiftHomeScreen extends StatelessWidget {
                   onEdit: () => onEdit(project),
                   onPlay: () => onPlay(project),
                   onShare: () => onShare(project),
+                  onDelete: () => _confirmDelete(context, project),
                 ),
               ),
             ),
         ],
       ),
     );
+  }
+
+  Future<void> _confirmDelete(BuildContext context, GiftProject project) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Excluir surpresa?'),
+          content: Text(
+            'A surpresa "${project.title}" será removida deste aparelho.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xffa4133c),
+              ),
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Excluir'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldDelete == true) {
+      onDelete(project);
+    }
   }
 }
 
@@ -121,12 +155,14 @@ class _GiftProjectTile extends StatelessWidget {
     required this.onEdit,
     required this.onPlay,
     required this.onShare,
+    required this.onDelete,
   });
 
   final GiftProject project;
   final VoidCallback onEdit;
   final VoidCallback onPlay;
   final VoidCallback onShare;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -196,6 +232,14 @@ class _GiftProjectTile extends StatelessWidget {
                   onPressed: onShare,
                   icon: const Icon(Icons.ios_share),
                   tooltip: 'Compartilhar',
+                ),
+                IconButton.filledTonal(
+                  style: IconButton.styleFrom(
+                    foregroundColor: const Color(0xffa4133c),
+                  ),
+                  onPressed: onDelete,
+                  icon: const Icon(Icons.delete_outline),
+                  tooltip: 'Excluir',
                 ),
               ],
             ),

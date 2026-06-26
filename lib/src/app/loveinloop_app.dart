@@ -5,6 +5,7 @@ import 'package:loveinloop/src/domain/gift_project.dart';
 import 'package:loveinloop/src/features/editor/gift_editor_screen.dart';
 import 'package:loveinloop/src/features/home/gift_home_screen.dart';
 import 'package:loveinloop/src/features/player/gift_player_screen.dart';
+import 'package:loveinloop/src/features/splash/loveinloop_splash_screen.dart';
 
 class LoveInLoopApp extends StatefulWidget {
   const LoveInLoopApp({super.key});
@@ -17,6 +18,7 @@ class _LoveInLoopAppState extends State<LoveInLoopApp> {
   final _repository = LocalGiftProjectRepository();
   final _shareService = GiftShareService();
   late Future<List<GiftProject>> _projectsFuture;
+  var _showSplash = true;
 
   @override
   void initState() {
@@ -133,6 +135,13 @@ class _LoveInLoopAppState extends State<LoveInLoopApp> {
       home: FutureBuilder<List<GiftProject>>(
         future: _projectsFuture,
         builder: (context, snapshot) {
+          if (_showSplash) {
+            return LoveInLoopSplashScreen(
+              isReady: snapshot.hasData,
+              onFinished: () => setState(() => _showSplash = false),
+            );
+          }
+
           if (!snapshot.hasData) {
             return const _LoadingScreen();
           }
@@ -188,6 +197,12 @@ class _LoveInLoopAppState extends State<LoveInLoopApp> {
             },
             onShare: (project) async {
               await _shareService.shareProject(project);
+            },
+            onDelete: (project) async {
+              final updated = projects
+                  .where((item) => item.id != project.id)
+                  .toList();
+              await _saveProjects(updated);
             },
           );
         },
