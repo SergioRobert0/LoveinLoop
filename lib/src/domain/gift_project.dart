@@ -1,6 +1,6 @@
 enum GiftPlan { free, premium, vip }
 
-enum GiftMusicType { asset, local, recorded }
+enum GiftMusicType { none, asset, local, recorded }
 
 class GiftPhoto {
   const GiftPhoto({
@@ -73,10 +73,10 @@ class GiftMusic {
     return GiftMusic(
       type: GiftMusicType.values.firstWhere(
         (type) => type.name == json['type'],
-        orElse: () => GiftMusicType.asset,
+        orElse: () => GiftMusicType.none,
       ),
-      path: json['path'] as String? ?? 'music.mp3',
-      title: json['title'] as String? ?? 'Trilha LoveinLoop',
+      path: json['path'] as String? ?? '',
+      title: json['title'] as String? ?? 'Sem áudio',
     );
   }
 }
@@ -213,9 +213,9 @@ class GiftProject {
           'Obrigado por fazer parte da minha vida de um jeito tão bonito.',
       photos: const [],
       music: const GiftMusic(
-        type: GiftMusicType.asset,
-        path: 'music.mp3',
-        title: 'Trilha LoveinLoop',
+        type: GiftMusicType.none,
+        path: '',
+        title: 'Sem áudio',
       ),
       themeId: 'classic_rose',
       plan: GiftPlan.free,

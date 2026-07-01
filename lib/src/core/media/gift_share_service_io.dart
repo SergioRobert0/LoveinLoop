@@ -39,7 +39,8 @@ class GiftShareService {
       }
     }
 
-    if (project.music.type != GiftMusicType.asset) {
+    if (project.music.type != GiftMusicType.asset &&
+        project.music.type != GiftMusicType.none) {
       final musicFile = File(project.music.path);
       if (await musicFile.exists()) {
         archive.addFile(

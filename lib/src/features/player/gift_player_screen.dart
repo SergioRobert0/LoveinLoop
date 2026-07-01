@@ -23,6 +23,9 @@ class _GiftPlayerScreenState extends State<GiftPlayerScreen> {
   @override
   void initState() {
     super.initState();
+    if (widget.project.music.type == GiftMusicType.none) {
+      return;
+    }
     if (widget.project.music.type == GiftMusicType.asset) {
       _player.play(AssetSource(widget.project.music.path));
     } else if (widget.project.music.type == GiftMusicType.local ||

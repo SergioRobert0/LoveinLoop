@@ -71,6 +71,11 @@ class _LoveInLoopAppState extends State<LoveInLoopApp> {
                 yesMessage:
                     'Obrigado por fazer parte da minha vida de um jeito tão bonito.',
                 photos: sample.photos.take(5).toList(),
+                music: const GiftMusic(
+                  type: GiftMusicType.none,
+                  path: '',
+                  title: 'Sem áudio',
+                ),
               );
 
               final saved = await Navigator.of(context).push<GiftProject>(

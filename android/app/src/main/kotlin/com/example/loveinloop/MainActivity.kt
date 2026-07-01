@@ -274,7 +274,7 @@ class MainActivity : FlutterActivity() {
         val musicType = music?.get("type") as? String
         val musicPath = music?.get("path") as? String
         val audioFile = musicPath
-            ?.takeIf { musicType != "asset" }
+            ?.takeIf { musicType != "asset" && musicType != "none" }
             ?.let { File(it) }
             ?.takeIf { it.exists() }
 

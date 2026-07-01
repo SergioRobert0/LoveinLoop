@@ -280,7 +280,7 @@ class _GiftEditorScreenState extends State<GiftEditorScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Use a trilha padrão, escolha um áudio ou grave uma voz.',
+                          'Escolha um áudio do aparelho ou grave uma mensagem de voz.',
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                         const SizedBox(height: 12),
@@ -293,20 +293,7 @@ class _GiftEditorScreenState extends State<GiftEditorScreen> {
                             FilledButton.icon(
                               onPressed: _isImportingMedia ? null : _pickMusic,
                               icon: const Icon(Icons.library_music),
-                              label: const Text('Escolher música'),
-                            ),
-                            OutlinedButton.icon(
-                              onPressed: () {
-                                setState(() {
-                                  _music = const GiftMusic(
-                                    type: GiftMusicType.asset,
-                                    path: 'music.mp3',
-                                    title: 'Trilha LoveinLoop',
-                                  );
-                                });
-                              },
-                              icon: const Icon(Icons.refresh),
-                              label: const Text('Usar padrão'),
+                              label: const Text('Escolher áudio'),
                             ),
                             OutlinedButton.icon(
                               onPressed: _toggleVoiceRecording,
@@ -595,7 +582,9 @@ class _MusicTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final subtitle = music.type == GiftMusicType.asset
-        ? 'Trilha incluída no app'
+        ? 'Áudio incluído no app'
+        : music.type == GiftMusicType.none
+        ? 'A surpresa será criada sem som'
         : music.type == GiftMusicType.recorded
         ? 'Mensagem gravada no app'
         : 'Arquivo local importado';
