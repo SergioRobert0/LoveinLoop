@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:loveinloop/src/app/loveinloop_theme.dart';
 import 'package:loveinloop/src/core/media/gift_share_service.dart';
 import 'package:loveinloop/src/data/local_gift_project_repository.dart';
 import 'package:loveinloop/src/domain/gift_project.dart';
@@ -35,103 +36,10 @@ class _LoveInLoopAppState extends State<LoveInLoopApp> {
 
   @override
   Widget build(BuildContext context) {
-    const primary = Color(0xffc9184a);
-    const surface = Color(0xffffffff);
-    const text = Color(0xff3f2430);
-
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'LoveinLoop',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: primary,
-          brightness: Brightness.light,
-          primary: primary,
-          secondary: const Color(0xffff4d6d),
-          tertiary: const Color(0xfff4b942),
-          surface: surface,
-          error: const Color(0xffa4133c),
-        ),
-        useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xfffff5f7),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xfffff5f7),
-          foregroundColor: Color(0xff4a102a),
-          centerTitle: false,
-          elevation: 0,
-          scrolledUnderElevation: 0,
-          titleTextStyle: TextStyle(
-            color: Color(0xff4a102a),
-            fontSize: 22,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        cardTheme: CardThemeData(
-          color: surface,
-          elevation: 0,
-          margin: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-            side: const BorderSide(color: Color(0xffffccd8)),
-          ),
-        ),
-        filledButtonTheme: FilledButtonThemeData(
-          style: FilledButton.styleFrom(
-            backgroundColor: primary,
-            foregroundColor: Colors.white,
-            minimumSize: const Size(48, 48),
-            textStyle: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        ),
-        outlinedButtonTheme: OutlinedButtonThemeData(
-          style: OutlinedButton.styleFrom(
-            foregroundColor: const Color(0xff8a1538),
-            minimumSize: const Size(48, 48),
-            side: const BorderSide(color: primary),
-            textStyle: const TextStyle(fontWeight: FontWeight.w700),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        ),
-        textButtonTheme: TextButtonThemeData(
-          style: TextButton.styleFrom(
-            foregroundColor: const Color(0xff8a1538),
-            textStyle: const TextStyle(fontWeight: FontWeight.w700),
-          ),
-        ),
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: surface,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Color(0xffffb3c4)),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Color(0xffffb3c4)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: primary, width: 2),
-          ),
-          labelStyle: const TextStyle(color: Color(0xff7a2948)),
-        ),
-        textTheme: ThemeData.light().textTheme.apply(
-          bodyColor: text,
-          displayColor: const Color(0xff4a102a),
-        ),
-      ),
+      theme: buildLoveInLoopTheme(),
       home: FutureBuilder<List<GiftProject>>(
         future: _projectsFuture,
         builder: (context, snapshot) {
@@ -158,9 +66,10 @@ class _LoveInLoopAppState extends State<LoveInLoopApp> {
                 recipientName: '',
                 openingMessage:
                     'Preparei uma surpresa com alguns dos nossos momentos.',
-                questionText: 'Quer viver essa história comigo?',
+                questionText:
+                    'Posso te mostrar o quanto você é especial para mim?',
                 yesMessage:
-                    'Esse sim deixou tudo ainda mais especial. Eu te amo.',
+                    'Obrigado por fazer parte da minha vida de um jeito tão bonito.',
                 photos: sample.photos.take(5).toList(),
               );
 
@@ -196,7 +105,7 @@ class _LoveInLoopAppState extends State<LoveInLoopApp> {
               );
             },
             onShare: (project) async {
-              await _shareService.shareProject(project);
+              await _shareProject(context, project);
             },
             onDelete: (project) async {
               final updated = projects
@@ -209,6 +118,62 @@ class _LoveInLoopAppState extends State<LoveInLoopApp> {
       ),
     );
   }
+
+  Future<void> _shareProject(BuildContext context, GiftProject project) async {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return const AlertDialog(
+          content: Row(
+            children: [
+              SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 3),
+              ),
+              SizedBox(width: 16),
+              Expanded(child: Text('Gerando vídeo rápido...')),
+            ],
+          ),
+        );
+      },
+    );
+
+    try {
+      final result = await _shareService.shareProject(project);
+      if (!context.mounted) {
+        return;
+      }
+      Navigator.of(context, rootNavigator: true).pop();
+
+      if (result == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Compartilhamento indisponível nesta plataforma.'),
+          ),
+        );
+        return;
+      }
+
+      final message = result.openedShareSheet
+          ? result.isVideo
+                ? 'Vídeo pronto. Escolha onde compartilhar.'
+                : 'Pacote exportado. Escolha onde compartilhar.'
+          : 'Arquivo gerado, mas o compartilhamento nativo não abriu. Reinstale o app e tente novamente.';
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+    } catch (error) {
+      if (!context.mounted) {
+        return;
+      }
+      Navigator.of(context, rootNavigator: true).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Não foi possível compartilhar: $error')),
+      );
+    }
+  }
 }
 
 class _LoadingScreen extends StatelessWidget {
@@ -218,7 +183,7 @@ class _LoadingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       body: Center(
-        child: Icon(Icons.favorite, color: Color(0xffc9184a), size: 96),
+        child: Icon(Icons.favorite, color: LoveInLoopColors.primary, size: 96),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:loveinloop/src/app/loveinloop_theme.dart';
 import 'package:loveinloop/src/core/media/gift_media_importer.dart';
 import 'package:loveinloop/src/domain/gift_project.dart';
 import 'package:loveinloop/src/shared/widgets/gift_image.dart';
@@ -204,9 +205,7 @@ class _GiftEditorScreenState extends State<GiftEditorScreen> {
                           child: FilledButton(
                             onPressed: details.onStepContinue,
                             child: Text(
-                              _currentStep == 4
-                                  ? 'Salvar surpresa ❤️'
-                                  : 'Próximo ❤️',
+                              _currentStep == 4 ? 'Salvar surpresa' : 'Próximo',
                             ),
                           ),
                         ),
@@ -327,10 +326,19 @@ class _GiftEditorScreenState extends State<GiftEditorScreen> {
                   ),
                   Step(
                     title: const Text('Mensagens'),
-                    subtitle: const Text('Abertura e pergunta final'),
+                    subtitle: const Text('Abertura e fechamento'),
                     isActive: _currentStep >= 3,
                     content: Column(
                       children: [
+                        _MomentTemplateBar(
+                          onSelect: (template) {
+                            setState(() {
+                              _questionText.text = template.callToAction;
+                              _yesMessage.text = template.finalMessage;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 12),
                         _TextField(
                           controller: _openingMessage,
                           label: 'Mensagem de abertura',
@@ -340,14 +348,14 @@ class _GiftEditorScreenState extends State<GiftEditorScreen> {
                         ),
                         _TextField(
                           controller: _questionText,
-                          label: 'Pergunta final',
+                          label: 'Chamada final',
                           icon: Icons.favorite,
                           maxLines: 2,
                           required: true,
                         ),
                         _TextField(
                           controller: _yesMessage,
-                          label: 'Mensagem depois do SIM',
+                          label: 'Mensagem final',
                           icon: Icons.celebration,
                           maxLines: 4,
                           required: true,
@@ -392,7 +400,7 @@ class _ProgressHeader extends StatelessWidget {
           Text(
             'Etapa $stepNumber de 5',
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: const Color(0xff8a1538),
+              color: LoveInLoopColors.primary,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -402,8 +410,8 @@ class _ProgressHeader extends StatelessWidget {
             child: LinearProgressIndicator(
               value: stepNumber / 5,
               minHeight: 8,
-              backgroundColor: const Color(0xffffccd8),
-              color: const Color(0xffc9184a),
+              backgroundColor: LoveInLoopColors.border,
+              color: LoveInLoopColors.primary,
             ),
           ),
         ],
@@ -435,7 +443,7 @@ class _TextField extends StatelessWidget {
         controller: controller,
         maxLines: maxLines,
         decoration: InputDecoration(
-          prefixIcon: Icon(icon, color: const Color(0xffc9184a)),
+          prefixIcon: Icon(icon, color: LoveInLoopColors.primary),
           labelText: label,
         ),
         validator: required
@@ -446,6 +454,76 @@ class _TextField extends StatelessWidget {
                 return null;
               }
             : null,
+      ),
+    );
+  }
+}
+
+class _MomentTemplate {
+  const _MomentTemplate({
+    required this.label,
+    required this.icon,
+    required this.callToAction,
+    required this.finalMessage,
+  });
+
+  final String label;
+  final IconData icon;
+  final String callToAction;
+  final String finalMessage;
+}
+
+const _momentTemplates = [
+  _MomentTemplate(
+    label: 'Amor',
+    icon: Icons.favorite,
+    callToAction: 'Guarde esse carinho comigo?',
+    finalMessage:
+        'Você é uma das partes mais bonitas da minha vida. Obrigado por existir perto de mim.',
+  ),
+  _MomentTemplate(
+    label: 'Aniversário',
+    icon: Icons.cake,
+    callToAction: 'Vamos celebrar esse dia especial?',
+    finalMessage:
+        'Que seu novo ciclo seja leve, bonito e cheio de momentos que façam seu coração sorrir.',
+  ),
+  _MomentTemplate(
+    label: 'Saudade',
+    icon: Icons.schedule,
+    callToAction: 'Posso te lembrar o quanto você faz falta?',
+    finalMessage:
+        'Mesmo de longe, você continua presente nos meus pensamentos e nas melhores memórias.',
+  ),
+  _MomentTemplate(
+    label: 'Gratidão',
+    icon: Icons.volunteer_activism,
+    callToAction: 'Você sabe o quanto é importante para mim?',
+    finalMessage:
+        'Obrigado por cada gesto, cada cuidado e cada momento que tornou minha vida melhor.',
+  ),
+];
+
+class _MomentTemplateBar extends StatelessWidget {
+  const _MomentTemplateBar({required this.onSelect});
+
+  final ValueChanged<_MomentTemplate> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          for (final template in _momentTemplates)
+            ActionChip(
+              avatar: Icon(template.icon, size: 18),
+              label: Text(template.label),
+              onPressed: () => onSelect(template),
+            ),
+        ],
       ),
     );
   }
@@ -465,7 +543,7 @@ class _PhotoPreview extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              const Icon(Icons.photo_library, color: Color(0xffc9184a)),
+              const Icon(Icons.photo_library, color: LoveInLoopColors.primary),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -524,7 +602,7 @@ class _MusicTile extends StatelessWidget {
 
     return Card(
       child: ListTile(
-        leading: const Icon(Icons.music_note, color: Color(0xffc9184a)),
+        leading: const Icon(Icons.music_note, color: LoveInLoopColors.primary),
         title: Text(music.title),
         subtitle: Text(subtitle),
       ),
@@ -556,10 +634,10 @@ class _ReviewStep extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Resumo da surpresa ❤️',
+              'Resumo da surpresa',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w800,
-                color: const Color(0xff4a102a),
+                color: LoveInLoopColors.primaryDark,
               ),
             ),
             const SizedBox(height: 12),
@@ -585,7 +663,7 @@ class _ReviewStep extends StatelessWidget {
             _ReviewRow(label: 'Para', value: recipientName),
             _ReviewRow(label: 'Fotos', value: '${photos.length}'),
             _ReviewRow(label: 'Música', value: musicTitle),
-            _ReviewRow(label: 'Pergunta', value: questionText),
+            _ReviewRow(label: 'Fechamento', value: questionText),
           ],
         ),
       ),
@@ -607,7 +685,7 @@ class _ReviewRow extends StatelessWidget {
       child: RichText(
         text: TextSpan(
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: const Color(0xff3f2430),
+            color: LoveInLoopColors.text,
             height: 1.35,
           ),
           children: [

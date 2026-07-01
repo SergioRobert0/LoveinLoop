@@ -1,3 +1,4 @@
+import 'package:loveinloop/src/core/media/gift_share_result.dart';
 import 'package:loveinloop/src/domain/gift_project.dart';
 
 class GiftShareService {
@@ -5,5 +6,7 @@ class GiftShareService {
     return null;
   }
 
-  Future<void> shareProject(GiftProject project) async {}
+  Future<GiftShareResult?> shareProject(GiftProject project) async {
+    return null;
+  }
 }

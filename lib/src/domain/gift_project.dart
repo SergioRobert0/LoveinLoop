@@ -202,28 +202,16 @@ class GiftProject {
 
   factory GiftProject.sample() {
     final now = DateTime.now();
-    final photos = _defaultAssetPhotos
-        .asMap()
-        .entries
-        .map(
-          (entry) => GiftPhoto(
-            id: 'sample_photo_${entry.key + 1}',
-            path: entry.value,
-            isAsset: true,
-            order: entry.key,
-          ),
-        )
-        .toList();
-
     return GiftProject(
       id: 'sample-${now.microsecondsSinceEpoch}',
-      title: 'Surpresa romântica',
-      creatorName: 'Sérgio',
-      recipientName: 'Letícia',
+      title: 'Presente especial',
+      creatorName: '',
+      recipientName: '',
       openingMessage: 'Preparei uma surpresa com alguns dos nossos momentos.',
-      questionText: 'Quer namorar comigo mais uma vez?',
-      yesMessage: 'Eu te amo e quero continuar descobrindo a vida ao seu lado.',
-      photos: photos,
+      questionText: 'Posso te mostrar o quanto você é especial para mim?',
+      yesMessage:
+          'Obrigado por fazer parte da minha vida de um jeito tão bonito.',
+      photos: const [],
       music: const GiftMusic(
         type: GiftMusicType.asset,
         path: 'music.mp3',
@@ -236,18 +224,3 @@ class GiftProject {
     );
   }
 }
-
-const _defaultAssetPhotos = [
-  'assets/image1.jpeg',
-  'assets/image2.jpeg',
-  'assets/image3.jpeg',
-  'assets/image4.jpg',
-  'assets/image5.jpg',
-  'assets/image6.jpg',
-  'assets/image7.jpg',
-  'assets/image8.jpg',
-  'assets/image9.jpg',
-  'assets/image10.jpg',
-  'assets/image11.jpg',
-  'assets/image12.jpg',
-];

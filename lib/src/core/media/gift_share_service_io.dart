@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:archive/archive_io.dart';
 import 'package:flutter/services.dart';
+import 'package:loveinloop/src/core/media/gift_share_result.dart';
 import 'package:loveinloop/src/domain/gift_project.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -55,18 +56,58 @@ class GiftShareService {
     return file;
   }
 
-  Future<void> shareProject(GiftProject project) async {
-    final file = await exportProject(project);
+  Future<GiftShareResult> shareProject(GiftProject project) async {
     if (!Platform.isAndroid) {
-      return;
+      final file = await exportProject(project);
+      return GiftShareResult(
+        path: file.path,
+        openedShareSheet: false,
+        isVideo: false,
+      );
     }
 
-    await _shareChannel.invokeMethod('shareFile', {
-      'path': file.path,
-      'subject': 'Presente LoveinLoop',
-      'text':
-          'Preparei uma surpresa interativa no LoveinLoop. Guarde este pacote para abrir no app.',
-    });
+    final videoPath = await _tryCreateVideo(project);
+    final file = videoPath == null
+        ? await exportProject(project)
+        : File(videoPath);
+    final isVideo = videoPath != null;
+    final openedShareSheet = await _tryOpenShareSheet(file, isVideo: isVideo);
+
+    return GiftShareResult(
+      path: file.path,
+      openedShareSheet: openedShareSheet,
+      isVideo: isVideo,
+    );
+  }
+
+  Future<String?> _tryCreateVideo(GiftProject project) async {
+    try {
+      return await _shareChannel.invokeMethod<String>(
+        'createShareVideo',
+        project.toJson(),
+      );
+    } on MissingPluginException {
+      return null;
+    } on PlatformException {
+      return null;
+    }
+  }
+
+  Future<bool> _tryOpenShareSheet(File file, {required bool isVideo}) async {
+    try {
+      await _shareChannel.invokeMethod<void>('shareFile', {
+        'path': file.path,
+        'mimeType': isVideo ? 'video/mp4' : 'application/octet-stream',
+        'subject': 'Surpresa LoveinLoop',
+        'text':
+            'Preparei uma surpresa em vídeo no LoveinLoop. Assista até o final e me responda.',
+      });
+      return true;
+    } on MissingPluginException {
+      return false;
+    } on PlatformException {
+      return false;
+    }
   }
 
   Future<Directory> _exportsDirectory() async {

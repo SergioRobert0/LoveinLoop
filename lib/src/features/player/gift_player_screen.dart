@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:loveinloop/src/app/loveinloop_theme.dart';
 import 'package:loveinloop/src/domain/gift_project.dart';
 import 'package:loveinloop/src/shared/widgets/gift_image.dart';
 
@@ -73,7 +74,11 @@ class _RomanticBackground extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xfffff5f7), Color(0xffffd6e5), Color(0xffffb3c4)],
+          colors: [
+            LoveInLoopColors.background,
+            LoveInLoopColors.surfaceMuted,
+            Color(0xffffd9c7),
+          ],
         ),
       ),
       child: child,
@@ -91,7 +96,7 @@ class _OpeningStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final creator = project.creatorName.trim();
     final recipient = project.recipientName.trim();
-    final names = creator.isEmpty ? recipient : '$creator ❤ $recipient';
+    final names = creator.isEmpty ? recipient : '$creator e $recipient';
 
     return SafeArea(
       child: Center(
@@ -108,7 +113,7 @@ class _OpeningStep extends StatelessWidget {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Color(0x26c9184a),
+                      color: Color(0x26be123c),
                       blurRadius: 24,
                       offset: Offset(0, 10),
                     ),
@@ -116,7 +121,7 @@ class _OpeningStep extends StatelessWidget {
                 ),
                 child: const Icon(
                   Icons.favorite,
-                  color: Color(0xffc9184a),
+                  color: LoveInLoopColors.primary,
                   size: 64,
                 ),
               ),
@@ -125,7 +130,7 @@ class _OpeningStep extends StatelessWidget {
                 names,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: const Color(0xff4a102a),
+                  color: LoveInLoopColors.primaryDark,
                   fontWeight: FontWeight.w900,
                   height: 1.15,
                 ),
@@ -135,7 +140,7 @@ class _OpeningStep extends StatelessWidget {
                 project.openingMessage,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: const Color(0xff5f2438),
+                  color: LoveInLoopColors.textMuted,
                   height: 1.45,
                 ),
               ),
@@ -172,6 +177,51 @@ class _CarouselStepState extends State<_CarouselStep> {
   @override
   Widget build(BuildContext context) {
     final photos = widget.project.orderedPhotos;
+
+    if (photos.isEmpty) {
+      return SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(28),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.photo_library_outlined,
+                color: LoveInLoopColors.primary,
+                size: 56,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Nenhuma foto foi adicionada',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: LoveInLoopColors.primaryDark,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'A surpresa pode continuar com a mensagem e o fechamento.',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: LoveInLoopColors.textMuted,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: widget.onNext,
+                  icon: const Icon(Icons.arrow_forward),
+                  label: const Text('Continuar'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return SafeArea(
       child: Stack(
@@ -252,7 +302,7 @@ class _PhotoDots extends StatelessWidget {
           height: 8,
           margin: const EdgeInsets.symmetric(horizontal: 3),
           decoration: BoxDecoration(
-            color: active ? const Color(0xffc9184a) : Colors.white,
+            color: active ? LoveInLoopColors.primary : Colors.white,
             borderRadius: BorderRadius.circular(999),
           ),
         );
@@ -271,30 +321,17 @@ class _FinalStep extends StatefulWidget {
 }
 
 class _FinalStepState extends State<_FinalStep> {
-  final _random = Random();
-  var _showProposal = true;
   var _showText = false;
-  var _noButtonTop = 200.0;
-  var _noButtonLeft = 150.0;
   var _hearts = <Widget>[];
 
-  void _moveNoButton() {
+  void _revealMessage() {
     final size = MediaQuery.of(context).size;
     setState(() {
-      _noButtonTop = _random.nextDouble() * (size.height - 120);
-      _noButtonLeft = _random.nextDouble() * (size.width - 128);
-    });
-  }
-
-  void _accept() {
-    final size = MediaQuery.of(context).size;
-    setState(() {
-      _showProposal = false;
       _showText = true;
       _hearts = List.generate(18, (index) {
         return _HeartParticle(
           key: ValueKey(index),
-          left: _random.nextDouble() * size.width,
+          left: (index / 18) * size.width,
           screenHeight: size.height,
         );
       });
@@ -306,7 +343,7 @@ class _FinalStepState extends State<_FinalStep> {
     return SafeArea(
       child: Stack(
         children: [
-          if (_showProposal)
+          if (!_showText)
             Center(
               child: Padding(
                 padding: const EdgeInsets.all(28),
@@ -318,7 +355,7 @@ class _FinalStepState extends State<_FinalStep> {
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.headlineMedium
                           ?.copyWith(
-                            color: const Color(0xff4a102a),
+                            color: LoveInLoopColors.primaryDark,
                             fontWeight: FontWeight.w900,
                             height: 1.15,
                           ),
@@ -327,57 +364,106 @@ class _FinalStepState extends State<_FinalStep> {
                     SizedBox(
                       width: double.infinity,
                       child: FilledButton.icon(
-                        onPressed: _accept,
-                        icon: const Icon(Icons.favorite),
-                        label: const Text('SIM ❤️'),
+                        onPressed: _revealMessage,
+                        icon: const Icon(Icons.mail),
+                        label: const Text('Abrir mensagem'),
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-          if (_showProposal)
-            Positioned(
-              top: _noButtonTop,
-              left: _noButtonLeft,
-              child: FilledButton.icon(
-                style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xff7a1e32),
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(112, 44),
-                ),
-                onPressed: _moveNoButton,
-                icon: const Icon(Icons.close),
-                label: const Text('NÃO'),
-              ),
-            ),
           if (_showText)
             Center(
               child: Padding(
                 padding: const EdgeInsets.all(28),
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: const Color(0xcc4a102a),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(22),
-                    child: Text(
-                      widget.project.yesMessage,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w800,
-                            height: 1.35,
-                          ),
-                    ),
-                  ),
-                ),
+                child: _FinalMessageCard(message: widget.project.yesMessage),
               ),
             ),
           ..._hearts,
         ],
+      ),
+    );
+  }
+}
+
+class _FinalMessageCard extends StatelessWidget {
+  const _FinalMessageCard({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0x55ffffff), width: 2),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x334c1024),
+            blurRadius: 30,
+            offset: Offset(0, 16),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 22),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 54,
+              height: 54,
+              decoration: const BoxDecoration(
+                color: LoveInLoopColors.surfaceMuted,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.favorite,
+                color: LoveInLoopColors.primary,
+                size: 30,
+              ),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              'Mensagem final',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: LoveInLoopColors.accent,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 14),
+            Container(
+              width: 58,
+              height: 3,
+              decoration: BoxDecoration(
+                color: LoveInLoopColors.primary,
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+            const SizedBox(height: 18),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: LoveInLoopColors.primaryDark,
+                fontWeight: FontWeight.w900,
+                height: 1.28,
+              ),
+            ),
+            const SizedBox(height: 18),
+            Text(
+              'Feito com LoveinLoop',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: LoveInLoopColors.textMuted,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -440,7 +526,7 @@ class _HeartParticleState extends State<_HeartParticle>
             opacity: _opacityAnimation.value,
             child: Icon(
               Icons.favorite,
-              color: const Color(0xffc9184a),
+              color: LoveInLoopColors.primary,
               size: 30 + _random.nextDouble() * 20,
             ),
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:loveinloop/src/app/loveinloop_theme.dart';
 
 class LoveInLoopSplashScreen extends StatefulWidget {
   const LoveInLoopSplashScreen({
@@ -83,7 +84,11 @@ class _LoveInLoopSplashScreenState extends State<LoveInLoopSplashScreen>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xfffff5f7), Color(0xffffd6e5), Color(0xffff8fab)],
+            colors: [
+              LoveInLoopColors.background,
+              LoveInLoopColors.surfaceMuted,
+              Color(0xffffc2ad),
+            ],
           ),
         ),
         child: Stack(
@@ -117,7 +122,7 @@ class _LoveInLoopSplashScreenState extends State<LoveInLoopSplashScreen>
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Color(0x33c9184a),
+                        color: Color(0x33be123c),
                         blurRadius: 32,
                         offset: Offset(0, 14),
                       ),
@@ -144,7 +149,7 @@ class _SoftHeart extends StatelessWidget {
   Widget build(BuildContext context) {
     return Opacity(
       opacity: opacity,
-      child: Icon(Icons.favorite, size: size, color: const Color(0xffc9184a)),
+      child: Icon(Icons.favorite, size: size, color: LoveInLoopColors.primary),
     );
   }
 }
